@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-14      # macOS runner with Xcode preinstalled
+    runs-on: macos-15      # macOS runner with a current Xcode matching modern .NET iOS workloads
 
     steps:
       - name: Checkout repository
