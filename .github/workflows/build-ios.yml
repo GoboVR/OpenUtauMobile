@@ -1,0 +1,48 @@
+name: Build iOS IPA
+
+on:
+  workflow_dispatch:      # Lets you trigger it manually from the Actions tab
+  push:
+    branches: [ master ]   # Auto-builds on pushes to master; change/remove as needed
+
+jobs:
+  build-ios:
+    runs-on: macos-14      # macOS runner with Xcode preinstalled
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+
+      - name: Install .NET 9.0 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Install MAUI iOS workload
+        run: dotnet workload install maui-ios
+
+      - name: Restore dependencies (iOS only)
+        run: dotnet restore -p:TargetFramework=net9.0-ios
+
+      - name: Build IPA (unsigned, Debug)
+        run: |
+          dotnet publish OpenUtauMobile/OpenUtauMobile.csproj \
+            -f net9.0-ios \
+            -c Debug \
+            -p:ArchiveOnBuild=true \
+            -p:RuntimeIdentifier=ios-arm64 \
+            -p:TargetFrameworks=net9.0-ios \
+            -p:CodesignKey="" \
+            -p:CodesignProvision="" \
+            -p:BuildIpa=true
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenUtauMobile-ios-ipa
+          path: OpenUtauMobile/bin/Debug/net9.0-ios/ios-arm64/publish/*.ipa
