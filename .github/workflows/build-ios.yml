@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-15      # macOS runner with a current Xcode matching modern .NET iOS workloads
+    runs-on: macos-26      # Newest hosted runner - default Xcode satisfies current .NET iOS workload requirements
 
     steps:
       - name: Checkout repository
