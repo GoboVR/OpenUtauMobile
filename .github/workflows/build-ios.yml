@@ -1,9 +1,9 @@
-name: Build iOS IPA
+name: Build iOS IPA (dev)
 
 on:
   workflow_dispatch:      # Lets you trigger it manually from the Actions tab
   push:
-    branches: [ master ]   # Auto-builds on pushes to master; change/remove as needed
+    branches: [ dev ]     # Auto-builds on pushes to dev; change/remove as needed
 
 jobs:
   build-ios:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: master
+          ref: dev
 
       - name: Show available Xcode versions
         run: ls /Applications | grep Xcode
@@ -46,5 +46,5 @@ jobs:
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: OpenUtauMobile-ios-ipa
+          name: OpenUtauMobile-ios-ipa-dev
           path: OpenUtauMobile/bin/Debug/net9.0-ios/ios-arm64/publish/*.ipa
