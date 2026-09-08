@@ -30,7 +30,7 @@ jobs:
         run: dotnet workload install maui-android
 
       - name: Restore dependencies (Android only)
-        run: dotnet restore OpenUtauMobile/OpenUtauMobile.csproj -f net9.0-android
+        run: dotnet restore OpenUtauMobile/OpenUtauMobile.csproj -p:TargetFramework=net9.0-android
 
       - name: Build APK (Debug)
         run: |
@@ -45,4 +45,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: OpenUtauMobile-android-arm64-dev
-          path: OpenUtauMobile/bin/Debug/net9.0-android/*-Signed.apk
+          path: OpenUtauMobile/bin/Debug/net9.0-android/**/*.apk
