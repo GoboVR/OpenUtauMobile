@@ -32,7 +32,7 @@ jobs:
       - name: Restore dependencies (iOS only)
         run: dotnet restore -p:TargetFramework=net9.0-ios
 
-      - name: Build IPA (unsigned, Debug)
+      - name: Build IPA (ad-hoc signed, Debug)
         run: |
           dotnet publish OpenUtauMobile/OpenUtauMobile.csproj \
             -f net9.0-ios \
@@ -40,8 +40,7 @@ jobs:
             -p:ArchiveOnBuild=true \
             -p:RuntimeIdentifier=ios-arm64 \
             -p:TargetFrameworks=net9.0-ios \
-            -p:CodesignKey="" \
-            -p:CodesignProvision="" \
+            -p:CodesignKey="-" \
             -p:BuildIpa=true
 
       - name: Upload IPA artifact
