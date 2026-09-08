@@ -30,7 +30,7 @@ jobs:
         run: dotnet workload install maui-ios
 
       - name: Restore dependencies (iOS only)
-        run: dotnet restore -p:TargetFramework=net9.0-ios
+        run: dotnet restore OpenUtauMobile/OpenUtauMobile.csproj -f net9.0-ios
 
       - name: Build IPA (ad-hoc signed, Debug)
         run: |
