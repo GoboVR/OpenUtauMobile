@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-26      # Newest hosted runner - default Xcode satisfies current .NET iOS workload requirements
+    runs-on: macos-26      # Newest hosted runner - needs a modern Xcode for net10.0-ios
 
     steps:
       - name: Checkout repository
@@ -15,49 +15,34 @@ jobs:
         with:
           ref: dev
 
-      - name: Patch shared libraries to also target net9.0
-        run: |
-          FILES=(
-            "OpenUtau.Core/OpenUtau.Core.csproj"
-            "OpenUtau.Plugin.Builtin/OpenUtau.Plugin.Builtin.csproj"
-            "OpenUtauMobile.Plugin.Renderers/OpenUtauMobile.Plugin.Renderers.csproj"
-          )
-          for f in "${FILES[@]}"; do
-            if [ -f "$f" ]; then
-              sed -i.bak -E 's#<TargetFramework>net10\.0</TargetFramework>#<TargetFrameworks>net9.0;net10.0</TargetFrameworks>#' "$f"
-              sed -i.bak -E 's#<TargetFrameworks>net10\.0</TargetFrameworks>#<TargetFrameworks>net9.0;net10.0</TargetFrameworks>#' "$f"
-              echo "=== $f ==="
-              grep -i "TargetFramework" "$f"
-            else
-              echo "WARNING: $f not found - path may have changed"
-            fi
-          done
-
       - name: Show available Xcode versions
         run: ls /Applications | grep Xcode
 
-      - name: Select latest Xcode version
-        run: sudo xcode-select -s /Applications/Xcode_26.5.app/Contents/Developer
+      - name: Select newest available Xcode
+        run: |
+          LATEST=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -n1)
+          if [ -z "$LATEST" ]; then LATEST="/Applications/Xcode.app"; fi
+          echo "Selecting $LATEST"
+          sudo xcode-select -s "$LATEST/Contents/Developer"
 
-      - name: Install .NET 9.0 SDK
+      - name: Install .NET 10.0 SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
-      - name: Install MAUI iOS workload
-        run: dotnet workload install maui-ios
+      - name: Install iOS workload
+        run: dotnet workload install ios
 
-      - name: Restore dependencies (iOS only)
-        run: dotnet restore OpenUtauMobile/OpenUtauMobile.csproj -p:TargetFramework=net9.0-ios
+      - name: Restore dependencies (iOS head only)
+        run: dotnet restore OpenUtauMobile.iOS/OpenUtauMobile.iOS.csproj
 
       - name: Build IPA (ad-hoc signed, Debug)
         run: |
-          dotnet publish OpenUtauMobile/OpenUtauMobile.csproj \
-            -f net9.0-ios \
+          dotnet publish OpenUtauMobile.iOS/OpenUtauMobile.iOS.csproj \
+            -f net10.0-ios \
             -c Debug \
             -p:ArchiveOnBuild=true \
             -p:RuntimeIdentifier=ios-arm64 \
-            -p:TargetFrameworks=net9.0-ios \
             -p:CodesignKey="-" \
             -p:BuildIpa=true
 
@@ -65,4 +50,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: OpenUtauMobile-ios-ipa-dev
-          path: OpenUtauMobile/bin/Debug/net9.0-ios/ios-arm64/publish/*.ipa
+          path: OpenUtauMobile.iOS/bin/Debug/net10.0-ios/**/*.ipa
