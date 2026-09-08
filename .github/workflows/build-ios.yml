@@ -15,6 +15,24 @@ jobs:
         with:
           ref: dev
 
+      - name: Patch shared libraries to also target net9.0
+        run: |
+          FILES=(
+            "OpenUtau.Core/OpenUtau.Core.csproj"
+            "OpenUtau.Plugin.Builtin/OpenUtau.Plugin.Builtin.csproj"
+            "OpenUtauMobile.Plugin.Renderers/OpenUtauMobile.Plugin.Renderers.csproj"
+          )
+          for f in "${FILES[@]}"; do
+            if [ -f "$f" ]; then
+              sed -i.bak -E 's#<TargetFramework>net10\.0</TargetFramework>#<TargetFrameworks>net9.0;net10.0</TargetFrameworks>#' "$f"
+              sed -i.bak -E 's#<TargetFrameworks>net10\.0</TargetFrameworks>#<TargetFrameworks>net9.0;net10.0</TargetFrameworks>#' "$f"
+              echo "=== $f ==="
+              grep -i "TargetFramework" "$f"
+            else
+              echo "WARNING: $f not found - path may have changed"
+            fi
+          done
+
       - name: Show available Xcode versions
         run: ls /Applications | grep Xcode
 
