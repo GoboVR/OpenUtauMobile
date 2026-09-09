@@ -45,8 +45,12 @@ jobs:
             -p:SelfContained=true \
             -p:CodesignKey="-"
 
+      - name: Find IPA
+        run: find OpenUtauMobile.iOS/bin/Debug/net10.0-ios -iname "*.ipa"
+
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: OpenUtauMobile-ios-ipa-dev
-          path: OpenUtauMobile.iOS/bin/Debug/net10.0-ios/ios-arm64/publish/*.ipa
+          path: OpenUtauMobile.iOS/bin/Debug/net10.0-ios/**/*.ipa
+          if-no-files-found: error
