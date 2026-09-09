@@ -38,16 +38,22 @@ jobs:
 
       - name: Build .app (Debug, unsigned)
         run: |
-          dotnet build OpenUtauMobile.iOS/OpenUtauMobile.iOS.csproj \
+          dotnet publish OpenUtauMobile.iOS/OpenUtauMobile.iOS.csproj \
             -f net10.0-ios \
             -c Debug \
             -p:RuntimeIdentifier=ios-arm64 \
+            -p:SelfContained=true \
             -p:CodesignKey="-"
 
       - name: Package IPA manually
         run: |
           APP_PATH=$(find OpenUtauMobile.iOS/bin/Debug/net10.0-ios -iname "*.app" -type d | head -n1)
           echo "Found app bundle: $APP_PATH"
+          if [ -z "$APP_PATH" ]; then
+            echo "No .app found under bin/, checking obj/ and any publish output..."
+            find OpenUtauMobile.iOS -iname "*.app" -type d
+            exit 1
+          fi
           mkdir -p Payload
           cp -r "$APP_PATH" Payload/
           zip -r OpenUtauMobile.ipa Payload
