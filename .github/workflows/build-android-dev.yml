@@ -43,3 +43,4 @@ jobs:
         with:
           name: OpenUtauMobile-android-arm64-dev
           path: OpenUtauMobile.Android/bin/Debug/net10.0-android36.0/**/*.apk
+          if-no-files-found: error
