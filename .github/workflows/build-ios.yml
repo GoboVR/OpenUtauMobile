@@ -45,6 +45,17 @@ jobs:
             -p:SelfContained=true \
             -p:CodesignKey="-"
 
+      - name: Inspect publish folder contents
+        run: |
+          echo "--- ls -la on the exact publish folder from the build log ---"
+          ls -la "OpenUtauMobile.iOS/bin/Debug/net10.0-ios/ios-arm64/publish/" || echo "That folder does not exist"
+          echo ""
+          echo "--- full tree under OpenUtauMobile.iOS/bin ---"
+          find OpenUtauMobile.iOS/bin -maxdepth 6 || echo "bin folder does not exist"
+          echo ""
+          echo "--- searching whole filesystem (excluding /System, /usr) for any .ipa ---"
+          find / -iname "*.ipa" -not -path "/System/*" -not -path "/usr/*" 2>/dev/null
+
       - name: Find IPA
         run: |
           echo "Searching entire runner home for .ipa files..."
