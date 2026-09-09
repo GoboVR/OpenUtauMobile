@@ -45,29 +45,24 @@ jobs:
             -p:SelfContained=true \
             -p:CodesignKey="-"
 
-      - name: Inspect publish folder contents
+      - name: Inspect build output folder contents
         run: |
-          echo "--- ls -la on the exact publish folder from the build log ---"
-          ls -la "OpenUtauMobile.iOS/bin/Debug/net10.0-ios/ios-arm64/publish/" || echo "That folder does not exist"
+          echo "--- contents of ios-arm64 build output ---"
+          ls -la "OpenUtauMobile.iOS/bin/Debug/net10.0-ios/ios-arm64/"
           echo ""
-          echo "--- full tree under OpenUtauMobile.iOS/bin ---"
-          find OpenUtauMobile.iOS/bin -maxdepth 6 || echo "bin folder does not exist"
-          echo ""
-          echo "--- searching whole filesystem (excluding /System, /usr) for any .ipa ---"
-          find / -iname "*.ipa" -not -path "/System/*" -not -path "/usr/*" 2>/dev/null
+          echo "--- looking for the actual Mach-O executable (no extension, executable bit set) ---"
+          find "OpenUtauMobile.iOS/bin/Debug/net10.0-ios/ios-arm64/" -maxdepth 1 -type f -perm +111
 
-      - name: Find IPA
+      - name: Package IPA manually from build output
         run: |
-          echo "Searching entire runner home for .ipa files..."
-          find /Users/runner -iname "*.ipa" 2>/dev/null
-          IPA_PATH=$(find /Users/runner -iname "*.ipa" 2>/dev/null | head -n1)
-          if [ -z "$IPA_PATH" ]; then
-            echo "No .ipa found anywhere under /Users/runner."
-            exit 1
-          fi
-          echo "Found: $IPA_PATH"
+          SRC="OpenUtauMobile.iOS/bin/Debug/net10.0-ios/ios-arm64"
+          APP="Payload/OpenUtauMobile.iOS.app"
+          mkdir -p "$APP"
+          cp -r "$SRC"/* "$APP"/
           mkdir -p out
-          cp "$IPA_PATH" out/OpenUtauMobile.iOS.ipa
+          zip -r out/OpenUtauMobile.iOS.ipa Payload
+          echo "--- ipa contents ---"
+          unzip -l out/OpenUtauMobile.iOS.ipa | head -20
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
