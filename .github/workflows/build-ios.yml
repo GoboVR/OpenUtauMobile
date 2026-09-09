@@ -36,18 +36,26 @@ jobs:
       - name: Restore dependencies (iOS head only)
         run: dotnet restore OpenUtauMobile.iOS/OpenUtauMobile.iOS.csproj
 
-      - name: Build IPA (ad-hoc signed, Debug)
+      - name: Build .app (Debug, unsigned)
         run: |
-          dotnet publish OpenUtauMobile.iOS/OpenUtauMobile.iOS.csproj \
+          dotnet build OpenUtauMobile.iOS/OpenUtauMobile.iOS.csproj \
             -f net10.0-ios \
             -c Debug \
-            -p:ArchiveOnBuild=true \
             -p:RuntimeIdentifier=ios-arm64 \
-            -p:CodesignKey="-" \
-            -p:BuildIpa=true
+            -p:CodesignKey="-"
+
+      - name: Package IPA manually
+        run: |
+          APP_PATH=$(find OpenUtauMobile.iOS/bin/Debug/net10.0-ios -iname "*.app" -type d | head -n1)
+          echo "Found app bundle: $APP_PATH"
+          mkdir -p Payload
+          cp -r "$APP_PATH" Payload/
+          zip -r OpenUtauMobile.ipa Payload
+          mkdir -p out
+          mv OpenUtauMobile.ipa out/
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: OpenUtauMobile-ios-ipa-dev
-          path: OpenUtauMobile.iOS/bin/Debug/net10.0-ios/**/*.ipa
+          path: out/OpenUtauMobile.ipa
