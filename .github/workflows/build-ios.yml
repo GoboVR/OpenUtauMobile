@@ -60,6 +60,10 @@ jobs:
           security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN_PATH" -P "$KEYCHAIN_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
+          # Self-signed certs aren't trusted by default - explicitly trust it for code signing,
+          # or find-identity will keep reporting 0 valid identities even though it's imported
+          sudo security add-trusted-cert -d -r trustRoot -k "$KEYCHAIN_PATH" "$RUNNER_TEMP/cert.pem"
+
           echo "--- Identities now available ---"
           security find-identity -v -p codesigning "$KEYCHAIN_PATH"
 
