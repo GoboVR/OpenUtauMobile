@@ -70,17 +70,34 @@ jobs:
       - name: Restore dependencies (iOS head only)
         run: dotnet restore OpenUtauMobile.iOS/OpenUtauMobile.iOS.csproj
 
-      - name: Build IPA (Debug, self-signed)
+      - name: Build (Debug, self-signed, no archive)
         run: |
           dotnet publish OpenUtauMobile.iOS/OpenUtauMobile.iOS.csproj \
             -f net10.0-ios \
             -c Debug \
             -p:RuntimeIdentifier=ios-arm64 \
             -p:SelfContained=true \
-            -p:ArchiveOnBuild=true \
-            -p:BuildIpa=true \
-            -p:EnableCodeSigning=true \
             -p:CodesignKey="iPhone Developer: Local Build (CI)"
+
+      - name: Check for a real native executable
+        run: |
+          OUT="OpenUtauMobile.iOS/bin/Debug/net10.0-ios/ios-arm64"
+          echo "--- all files without an extension (candidate native executables) ---"
+          find "$OUT" -maxdepth 1 -type f ! -name "*.*"
+          echo ""
+          echo "--- running 'file' on each candidate ---"
+          for f in $(find "$OUT" -maxdepth 1 -type f ! -name "*.*"); do
+            echo "$f:"
+            file "$f"
+          done
+          echo ""
+          echo "--- codesign status of the main executable, if found ---"
+          MAIN="$OUT/OpenUtauMobile.iOS"
+          if [ -f "$MAIN" ]; then
+            codesign -dv "$MAIN" 2>&1 || echo "(not signed or codesign failed)"
+          else
+            echo "No file named OpenUtauMobile.iOS found at expected path."
+          fi
 
       - name: Inspect build output
         run: |
