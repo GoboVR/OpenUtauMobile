@@ -77,6 +77,8 @@ jobs:
             -c Debug \
             -p:RuntimeIdentifier=ios-arm64 \
             -p:SelfContained=true \
+            -p:ArchiveOnBuild=true \
+            -p:BuildIpa=true \
             -p:CodesignKey="iPhone Developer: Local Build (CI)"
 
       - name: Inspect build output
