@@ -39,8 +39,12 @@ jobs:
           KEYCHAIN_PASSWORD="temppassword"
 
           # Generate a self-signed cert (not Apple-issued - fine for jailbreak/AppSync installs)
+          # Must include the codeSigning EKU or macOS won't treat it as a valid signing identity
           openssl req -x509 -newkey rsa:2048 -keyout "$RUNNER_TEMP/key.pem" -out "$RUNNER_TEMP/cert.pem" \
-            -days 365 -nodes -subj "/CN=iPhone Developer: Local Build (CI)"
+            -days 365 -nodes -subj "/CN=iPhone Developer: Local Build (CI)" \
+            -addext "extendedKeyUsage=codeSigning" \
+            -addext "keyUsage=digitalSignature" \
+            -addext "basicConstraints=critical,CA:false"
           openssl pkcs12 -export -out "$RUNNER_TEMP/cert.p12" \
             -inkey "$RUNNER_TEMP/key.pem" -in "$RUNNER_TEMP/cert.pem" \
             -password "pass:$KEYCHAIN_PASSWORD" -legacy
