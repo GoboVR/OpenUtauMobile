@@ -43,7 +43,7 @@ jobs:
             -days 365 -nodes -subj "/CN=iPhone Developer: Local Build (CI)"
           openssl pkcs12 -export -out "$RUNNER_TEMP/cert.p12" \
             -inkey "$RUNNER_TEMP/key.pem" -in "$RUNNER_TEMP/cert.pem" \
-            -password "pass:$KEYCHAIN_PASSWORD"
+            -password "pass:$KEYCHAIN_PASSWORD" -legacy
 
           # Create a fresh temporary keychain and make it the default/search target
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
