@@ -79,6 +79,7 @@ jobs:
             -p:SelfContained=true \
             -p:ArchiveOnBuild=true \
             -p:BuildIpa=true \
+            -p:EnableCodeSigning=true \
             -p:CodesignKey="iPhone Developer: Local Build (CI)"
 
       - name: Inspect build output
